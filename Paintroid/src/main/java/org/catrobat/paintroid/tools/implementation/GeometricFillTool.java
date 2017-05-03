@@ -22,6 +22,7 @@ package org.catrobat.paintroid.tools.implementation;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -35,6 +36,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -155,18 +157,39 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 		}
 
 		// TODO Should be transparent (CHECKERED Background) and not white
-		if(mCanvasPaint.getColor() == Color.TRANSPARENT)
-			drawPaint.setColor(Color.WHITE);
-
+		//if(mCanvasPaint.getColor() == Color.TRANSPARENT)
+		//	drawPaint.setColor(Color.BLACK);
+		//changePaintColor(mCanvasPaint.getColor());
 		switch (mBaseShape) {
 			case RECTANGLE:
-				drawCanvas.drawRect(shapeRect, drawPaint);
+				if(drawPaint.getColor() == Color.TRANSPARENT) {
+					mCanvasPaint.setStyle(Style.FILL);
+					mCanvasPaint.setColor(Color.BLACK);
+					drawCanvas.drawRect(shapeRect, mCanvasPaint);
+					mCanvasPaint.setColor(Color.TRANSPARENT);
+				}
+				else
+					drawCanvas.drawRect(shapeRect, drawPaint);
 				break;
 			case OVAL:
-				drawCanvas.drawOval(shapeRect, drawPaint);
+				if(drawPaint.getColor() == Color.TRANSPARENT) {
+					mCanvasPaint.setStyle(Style.FILL);
+					mCanvasPaint.setColor(Color.BLACK);
+					drawCanvas.drawOval(shapeRect, mCanvasPaint);
+					mCanvasPaint.setColor(Color.TRANSPARENT);
+				}
+				else
+					drawCanvas.drawOval(shapeRect, drawPaint);
 				break;
 			case STAR:
-				drawStar(drawCanvas, shapeRect);
+				if(drawPaint.getColor() == Color.TRANSPARENT) {
+					mCanvasPaint.setStyle(Style.FILL);
+					mCanvasPaint.setColor(Color.BLACK);
+					drawStar(drawCanvas, shapeRect);
+					mCanvasPaint.setColor(Color.TRANSPARENT);
+				}
+				else
+					drawStar(drawCanvas, shapeRect);
 				break;
 			case HEART:
 				drawHeart(drawCanvas, shapeRect);
@@ -206,8 +229,12 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 
 		Paint colorChangePaint = new Paint();
 		ColorFilter filter;
-		if(mCanvasPaint.getColor() == Color.TRANSPARENT)
-			filter = new LightingColorFilter(Color.BLACK, Color.WHITE);
+		if(mCanvasPaint.getColor() == Color.TRANSPARENT) {
+
+			//mCanvasPaint.setColor(Color.BLACK);
+			filter = new LightingColorFilter(Color.BLACK, mCanvasPaint.getColor());
+			//mCanvasPaint.setColor(Color.TRANSPARENT);
+		}
 		else {
 			filter = new LightingColorFilter(Color.BLACK, mCanvasPaint.getColor());
 			colorChangePaint.setAlpha(Color.alpha(mCanvasPaint.getColor()));
@@ -220,18 +247,19 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 	private void drawHeart(Canvas drawCanvas, RectF shapeRect) {
 		Bitmap bmp = BitmapFactory.decodeResource(PaintroidApplication.applicationContext.getResources(), R.drawable.ic_heart_black_48dp);
 		Bitmap scaled_bmp = Bitmap.createScaledBitmap(bmp, (int)shapeRect.width(), (int)shapeRect.height(), true);
-
+		BitmapShader bmp_shader = new BitmapShader(scaled_bmp, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
 		Paint colorChangePaint = new Paint();
 		ColorFilter filter;
-		if(mCanvasPaint.getColor() == Color.TRANSPARENT)
+		/*if(mCanvasPaint.getColor() == Color.TRANSPARENT)
 			filter = new LightingColorFilter(Color.BLACK, Color.WHITE);
 		else {
 			filter = new LightingColorFilter(Color.BLACK, mCanvasPaint.getColor());
 			colorChangePaint.setAlpha(Color.alpha(mCanvasPaint.getColor()));
-		}
-		colorChangePaint.setColorFilter(filter);
+		}*/
+		//colorChangePaint.setColorFilter(filter);
 
-		drawCanvas.drawBitmap(scaled_bmp, shapeRect.left, shapeRect.top, colorChangePaint);
+		bmp_shader.
+		//drawCanvas.drawBitmap(scaled_bmp, shapeRect.left, shapeRect.top, mCanvasPaint);
 	}
 
 	private float getLuminance() {
