@@ -162,11 +162,12 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 		//changePaintColor(mCanvasPaint.getColor());
 		switch (mBaseShape) {
 			case RECTANGLE:
-				if(drawPaint.getColor() == Color.TRANSPARENT) {
+				if(mCanvasPaint.getColor() == Color.TRANSPARENT) {
 					mCanvasPaint.setStyle(Style.FILL);
 					mCanvasPaint.setColor(Color.BLACK);
-					drawCanvas.drawRect(shapeRect, mCanvasPaint);
+					//drawCanvas.drawRect(shapeRect, tmpPaint);
 					mCanvasPaint.setColor(Color.TRANSPARENT);
+					mCanvasPaint.setStyle(Style.STROKE);
 				}
 				else
 					drawCanvas.drawRect(shapeRect, drawPaint);
@@ -175,8 +176,9 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 				if(drawPaint.getColor() == Color.TRANSPARENT) {
 					mCanvasPaint.setStyle(Style.FILL);
 					mCanvasPaint.setColor(Color.BLACK);
-					drawCanvas.drawOval(shapeRect, mCanvasPaint);
+					//drawCanvas.drawOval(shapeRect, mCanvasPaint);
 					mCanvasPaint.setColor(Color.TRANSPARENT);
+					mCanvasPaint.setStyle(Style.STROKE);
 				}
 				else
 					drawCanvas.drawOval(shapeRect, drawPaint);
@@ -231,35 +233,34 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 		ColorFilter filter;
 		if(mCanvasPaint.getColor() == Color.TRANSPARENT) {
 
-			//mCanvasPaint.setColor(Color.BLACK);
+			mCanvasPaint.setColor(Color.BLACK);
 			filter = new LightingColorFilter(Color.BLACK, mCanvasPaint.getColor());
-			//mCanvasPaint.setColor(Color.TRANSPARENT);
+			mCanvasPaint.setColor(Color.TRANSPARENT);
 		}
 		else {
 			filter = new LightingColorFilter(Color.BLACK, mCanvasPaint.getColor());
 			colorChangePaint.setAlpha(Color.alpha(mCanvasPaint.getColor()));
 		}
 		colorChangePaint.setColorFilter(filter);
-
+		colorChangePaint.setAlpha(mCanvasPaint.getAlpha());
 		drawCanvas.drawBitmap(scaled_bmp, shapeRect.left, shapeRect.top, colorChangePaint);
 	}
 
 	private void drawHeart(Canvas drawCanvas, RectF shapeRect) {
 		Bitmap bmp = BitmapFactory.decodeResource(PaintroidApplication.applicationContext.getResources(), R.drawable.ic_heart_black_48dp);
 		Bitmap scaled_bmp = Bitmap.createScaledBitmap(bmp, (int)shapeRect.width(), (int)shapeRect.height(), true);
-		BitmapShader bmp_shader = new BitmapShader(scaled_bmp, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+
 		Paint colorChangePaint = new Paint();
 		ColorFilter filter;
-		/*if(mCanvasPaint.getColor() == Color.TRANSPARENT)
+		if(mCanvasPaint.getColor() == Color.TRANSPARENT)
 			filter = new LightingColorFilter(Color.BLACK, Color.WHITE);
 		else {
 			filter = new LightingColorFilter(Color.BLACK, mCanvasPaint.getColor());
 			colorChangePaint.setAlpha(Color.alpha(mCanvasPaint.getColor()));
-		}*/
-		//colorChangePaint.setColorFilter(filter);
-
-		bmp_shader.
-		//drawCanvas.drawBitmap(scaled_bmp, shapeRect.left, shapeRect.top, mCanvasPaint);
+		}
+		colorChangePaint.setColorFilter(filter);
+		colorChangePaint.setAlpha(mCanvasPaint.getAlpha());
+		drawCanvas.drawBitmap(scaled_bmp, shapeRect.left, shapeRect.top, colorChangePaint);
 	}
 
 	private float getLuminance() {
@@ -273,6 +274,33 @@ public class GeometricFillTool extends BaseToolWithRectangleShape {
 		Point intPosition = new Point((int) mToolPosition.x, (int) mToolPosition.y);
 		int bitmapHeight = PaintroidApplication.drawingSurface.getBitmapHeight();
 		int bitmapWidth = PaintroidApplication.drawingSurface.getBitmapWidth();
+		Paint mPaint = new Paint();
+
+		if(mCanvasPaint.getColor() == Color.TRANSPARENT) {
+			mPaint.setXfermode(eraseXfermode);
+			mCanvasPaint.reset();
+			mCanvasPaint.setStyle(mBitmapPaint.getStyle());
+			mCanvasPaint.setStrokeJoin(mBitmapPaint.getStrokeJoin());
+			mCanvasPaint.setStrokeCap(mBitmapPaint.getStrokeCap());
+			mCanvasPaint.setStrokeWidth(mBitmapPaint.getStrokeWidth());
+			mCanvasPaint.setShader(CHECKERED_PATTERN.getShader());
+			mCanvasPaint.setColor(Color.BLACK);
+			mPaint.setAlpha(0x00);
+			mCanvasPaint.setAlpha(0x00);
+			mCanvasPaint.setColor(Color.BLACK);
+			switch (mBaseShape){
+				case RECTANGLE:
+					PaintroidApplication.drawingSurface.getCanvas().drawRect(intPosition.x - mBoxWidth / 2, intPosition.y - mBoxHeight / 2,
+							intPosition.x + mBoxWidth / 2, intPosition.y + mBoxHeight / 2 ,mPaint);
+					break;
+				case OVAL:
+					PaintroidApplication.drawingSurface.getCanvas().drawOval(intPosition.x - mBoxWidth / 2, intPosition.y - mBoxHeight / 2,
+							intPosition.x + mBoxWidth / 2, intPosition.y + mBoxHeight / 2 ,mPaint);
+					break;
+			}
+			//PaintroidApplication.drawingSurface.getCanvas().drawRect(,mPaint);
+			mCanvasPaint.setColor(Color.TRANSPARENT);
+		}
 
 		if (!((mToolPosition.x - mBoxWidth / 2 > bitmapWidth) || (mToolPosition.y - mBoxHeight / 2 > bitmapHeight)
 				|| (mToolPosition.x + mBoxWidth / 2 < 0) || (mToolPosition.y + mBoxHeight / 2 < 0))) {
